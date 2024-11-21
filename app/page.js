@@ -1,101 +1,210 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from "react";
+import {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "./api/categories";
 
-export default function Home() {
+export default function TestCategoriesPage() {
+  const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState({
+    libelle: "",
+    description: "",
+  });
+  const [updateData, setUpdateData] = useState({
+    code: "",
+    libelle: "",
+    description: "",
+  });
+  const [deleteCode, setDeleteCode] = useState("");
+
+  // Fetch categories
+  const loadCategories = async () => {
+    try {
+      const data = await fetchCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+    }
+  };
+
+  // Create category
+  const handleCreate = async () => {
+    try {
+      await createCategory(newCategory);
+      setNewCategory({ libelle: "", description: "" });
+      loadCategories();
+      alert("Category created!");
+    } catch (error) {
+      console.error("Failed to create category", error);
+    }
+  };
+
+  // Update category
+  const handleUpdate = async () => {
+    try {
+      await updateCategory(updateData.code, {
+        libelle: updateData.libelle,
+        description: updateData.description,
+      });
+      setUpdateData({ code: "", libelle: "", description: "" });
+      loadCategories();
+      alert("Category updated!");
+    } catch (error) {
+      console.error("Failed to update category", error);
+    }
+  };
+
+  // Delete category
+  const handleDelete = async () => {
+    try {
+      await deleteCategory(deleteCode);
+      setDeleteCode("");
+      loadCategories();
+      alert("Category deleted!");
+    } catch (error) {
+      console.error("Failed to delete category", error);
+    }
+  };
+
+  // Load categories on page load
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Categories Manager</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {/* Fetch Categories */}
+      <section style={styles.section}>
+        <h2 style={styles.subtitle}>All Categories</h2>
+        <ul style={styles.list}>
+          {categories.map((category) => (
+            <li key={category.code} style={styles.listItem}>
+              {category.code}
+              {"   "} <strong>{category.libelle}</strong>:{category.description}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Add Category */}
+      <section style={styles.section}>
+        <h2 style={styles.subtitle}>Add Category</h2>
+        <input
+          style={styles.input}
+          placeholder="Libelle"
+          value={newCategory.libelle}
+          onChange={(e) =>
+            setNewCategory({ ...newCategory, libelle: e.target.value })
+          }
+        />
+        <input
+          style={styles.input}
+          placeholder="Description"
+          value={newCategory.description}
+          onChange={(e) =>
+            setNewCategory({ ...newCategory, description: e.target.value })
+          }
+        />
+        <button style={styles.button} onClick={handleCreate}>
+          Add
+        </button>
+      </section>
+
+      {/* Update Category */}
+      <section style={styles.section}>
+        <h2 style={styles.subtitle}>Update Category</h2>
+        <input
+          style={styles.input}
+          placeholder="Code"
+          value={updateData.code}
+          onChange={(e) =>
+            setUpdateData({ ...updateData, code: e.target.value })
+          }
+        />
+        <input
+          style={styles.input}
+          placeholder="Libelle"
+          value={updateData.libelle}
+          onChange={(e) =>
+            setUpdateData({ ...updateData, libelle: e.target.value })
+          }
+        />
+        <input
+          style={styles.input}
+          placeholder="Description"
+          value={updateData.description}
+          onChange={(e) =>
+            setUpdateData({ ...updateData, description: e.target.value })
+          }
+        />
+        <button style={styles.button} onClick={handleUpdate}>
+          Update
+        </button>
+      </section>
+
+      {/* Delete Category */}
+      <section style={styles.section}>
+        <h2 style={styles.subtitle}>Delete Category</h2>
+        <input
+          style={styles.input}
+          placeholder="Code"
+          value={deleteCode}
+          onChange={(e) => setDeleteCode(e.target.value)}
+        />
+        <button style={styles.button} onClick={handleDelete}>
+          Delete
+        </button>
+      </section>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    backgroundColor: "#000",
+    color: "#fff",
+    fontFamily: "Arial, sans-serif",
+    padding: "20px",
+    minHeight: "100vh",
+  },
+  title: {
+    fontSize: "36px",
+    marginBottom: "20px",
+  },
+  subtitle: {
+    fontSize: "24px",
+    marginBottom: "10px",
+  },
+  section: {
+    marginBottom: "30px",
+  },
+  list: {
+    listStyle: "none",
+    padding: 0,
+  },
+  listItem: {
+    marginBottom: "10px",
+  },
+  input: {
+    backgroundColor: "#333",
+    color: "#fff",
+    border: "1px solid #444",
+    padding: "10px",
+    marginBottom: "10px",
+    display: "block",
+    width: "100%",
+    maxWidth: "400px",
+  },
+  button: {
+    backgroundColor: "#555",
+    color: "#fff",
+    border: "none",
+    padding: "10px 20px",
+    cursor: "pointer",
+  },
+};
